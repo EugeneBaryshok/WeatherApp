@@ -1,0 +1,151 @@
+apply plugin: 'com.android.application'
+
+apply plugin: 'kotlin-android'
+
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+    defaultConfig {
+        applicationId "com.example.weatherapp"
+        minSdkVersion 21
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    dataBinding {
+        enabled = true
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
+
+dependencies {
+    //Crop image
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.8.0'
+    implementation 'jp.wasabeef:blurry:3.0.0'
+
+    //ImageShadow
+    implementation 'com.qhutch.elevationimageview:elevationimageview:2.4'
+    implementation 'com.contrarywind:Android-PickerView:4.1.9'
+
+    // Required for authentication of account.
+    implementation "com.google.android.gms:play-services-auth:17.0.0"
+    implementation('com.google.api-client:google-api-client-android:1.23.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:3.14.4'
+
+    implementation "com.google.android.gms:play-services-drive:17.0.0"
+
+    implementation('com.google.apis:google-api-services-sheets:v4-rev505-1.23.0') {
+        exclude group: 'org.apache.httpcomponents'
+    }
+
+
+
+
+    implementation deps.viewpager2
+
+    implementation deps.app_compat
+    implementation deps.recyclerview
+    implementation deps.cardview
+    implementation deps.material
+    implementation deps.core_ktx
+    implementation deps.transition
+    implementation deps.navigation.fragment_ktx
+    implementation deps.room.runtime
+    implementation deps.room.room_ktx
+    implementation deps.lifecycle.livedata_ktx
+    implementation deps.lifecycle.runtime
+    implementation deps.lifecycle.java8
+    implementation deps.retrofit.runtime
+    implementation deps.retrofit.gson
+    implementation deps.glide.runtime
+    implementation deps.coroutines.android
+    implementation deps.coroutines.core
+    implementation deps.dagger.runtime
+    implementation deps.dagger.android
+    implementation deps.dagger.android_support
+    implementation deps.constraint_layout
+    implementation deps.kotlin.stdlib
+
+    implementation deps.timber
+
+    kapt deps.dagger.android_support_compiler
+    kapt deps.dagger.compiler
+    kapt deps.room.compiler
+    kapt deps.lifecycle.compiler
+
+    testImplementation deps.junit
+    testImplementation deps.mock_web_server
+    testImplementation deps.arch_core.testing
+    testImplementation deps.mockito.core
+
+    androidTestImplementation deps.atsl.core
+    androidTestImplementation deps.atsl.ext_junit
+    androidTestImplementation deps.atsl.runner
+    androidTestImplementation deps.atsl.rules
+
+    androidTestImplementation deps.app_compat
+    androidTestImplementation deps.recyclerview
+    androidTestImplementation deps.cardview
+    androidTestImplementation deps.material
+
+    androidTestImplementation deps.espresso.core
+    androidTestImplementation deps.espresso.contrib
+
+    androidTestImplementation deps.arch_core.testing
+    androidTestImplementation deps.mockito.core
+    androidTestImplementation deps.mockito.android
+}
+
+task fullCoverageReport(type: JacocoReport) {
+    dependsOn 'createDebugCoverageReport'
+    dependsOn 'testDebugUnitTest'
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+
+    def fileFilter = ['**/R.class', '**/R$*.class', '**/BuildConfig.*', '**/Manifest*.*',
+                      '**/*Test*.*', 'android/**/*.*',
+                      '**/*_MembersInjector.class',
+                      '**/Dagger*Component.class',
+                      '**/Dagger*Component$Builder.class',
+                      '**/*_*Factory.class',
+                      '**/*ComponentImpl.class',
+                      '**/*SubComponentBuilder.class']
+    def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
+    def mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories = files([mainSrc])
+    classDirectories = files([debugTree])
+    executionData = fileTree(dir: "$buildDir", includes: [
+            "jacoco/testDebugUnitTest.exec",
+            "outputs/code-coverage/connected/*coverage.ec"
+    ])
+}
+
+// we need all open to run tests which  a we enable only for debug builds.
+project.tasks.whenTaskAdded {
+    if (it.name == "testReleaseUnitTest") {
+        it.enabled = false
+    }
+}
